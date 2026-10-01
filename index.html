@@ -38,8 +38,8 @@
             font-size: 1.5em;
             box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
         }
-        .app-header h1 { color: white; font-size: 1.4em; font-weight: 600; }
-        .app-header .subtitle { color: #a0aec0; font-size: 0.85em; margin-top: 2px; }
+        .app-header h1 { color: white; font-size: 1.3em; font-weight: 600; }
+        .app-header .subtitle { color: #a0aec0; font-size: 0.8em; margin-top: 2px; }
         .app-header .status {
             margin-left: auto; color: #48bb78; font-size: 0.85em;
             display: flex; align-items: center; gap: 8px;
@@ -106,14 +106,14 @@
             justify-content: center; gap: 8px; margin-bottom: 10px;
         }
         .btn-primary { background: linear-gradient(135deg, #e94560 0%, #c23152 100%); color: white; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5); }
         .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
+        .btn-success:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
         .btn-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-        .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
+        .btn-warning:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
         .btn-danger { background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: white; box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3); }
-        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(100, 116, 139, 0.5); }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        .btn-danger:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(100, 116, 139, 0.5); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         
         .preview-section { 
             padding: 30px; background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%); 
@@ -139,13 +139,12 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             display: none;
         }
-        .placeholder-text { color: #a0aec0; font-size: 1.1em; padding: 40px; }
+        .placeholder-text { color: #a0aec0; font-size: 1em; padding: 30px; }
         .zoom-indicator {
             position: absolute; bottom: 15px; left: 50%;
             transform: translateX(-50%); background: rgba(0, 0, 0, 0.75);
             color: white; padding: 6px 14px; border-radius: 20px;
             font-size: 0.85em; font-weight: 600; z-index: 12;
-            backdrop-filter: blur(10px);
         }
         .save-hint {
             background: #fef3c7; border-left: 4px solid #f59e0b;
@@ -153,7 +152,6 @@
             font-size: 0.9em; color: #92400e; display: none;
         }
         
-        /* Modal de procesamiento IA */
         .ai-modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(15, 12, 41, 0.95);
@@ -162,28 +160,31 @@
         }
         .ai-modal.active { display: flex; }
         .ai-modal-content {
-            background: white; border-radius: 24px; padding: 40px;
+            background: white; border-radius: 24px; padding: 35px;
             max-width: 400px; width: 90%; text-align: center;
             box-shadow: 0 25px 80px rgba(0,0,0,0.5);
         }
         .ai-spinner {
-            width: 70px; height: 70px; margin: 0 auto 20px;
+            width: 60px; height: 60px; margin: 0 auto 20px;
             border: 5px solid #e2e8f0;
             border-top: 5px solid #e94560;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .ai-modal h2 { color: #2d3748; margin-bottom: 10px; font-size: 1.4em; }
-        .ai-modal p { color: #718096; margin-bottom: 20px; }
+        .ai-modal h2 { color: #2d3748; margin-bottom: 10px; font-size: 1.3em; }
+        .ai-modal p { color: #718096; margin-bottom: 10px; font-size: 0.95em; }
         .progress-bar {
-            width: 100%; height: 8px; background: #e2e8f0;
-            border-radius: 4px; overflow: hidden; margin-top: 15px;
+            width: 100%; height: 10px; background: #e2e8f0;
+            border-radius: 5px; overflow: hidden; margin-top: 15px;
         }
         .progress-fill {
             height: 100%; background: linear-gradient(90deg, #e94560, #f59e0b);
             width: 0%; transition: width 0.3s ease;
-            border-radius: 4px;
+            border-radius: 5px;
+        }
+        .progress-text {
+            font-size: 0.85em; color: #a0aec0; margin-top: 10px;
         }
         
         @media (max-width: 768px) {
@@ -252,7 +253,7 @@
         </div>
 
         <div class="preview-section">
-            <h3> Resultado Profesional</h3>
+            <h3>🎯 Resultado Profesional</h3>
             <div class="result-wrapper">
                 <canvas id="resultCanvas" width="1200" height="900"></canvas>
                 <p class="placeholder-text" id="placeholderText">Captura una foto y la IA eliminará el fondo automáticamente</p>
@@ -264,26 +265,25 @@
         </div>
     </div>
 
-    <!-- Modal de procesamiento IA -->
     <div class="ai-modal" id="aiModal">
         <div class="ai-modal-content">
             <div class="ai-spinner"></div>
-            <h2 id="aiTitle">Procesando con IA...</h2>
-            <p id="aiMessage">Eliminando fondo de tu objeto</p>
+            <h2 id="aiTitle">Preparando IA...</h2>
+            <p id="aiMessage">Cargando modelo de inteligencia artificial</p>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
-            <p style="font-size: 0.85em; color: #a0aec0; margin-top: 15px;">
-                Primera vez: ~15-30 segundos<br>
-                Siguientes: ~3-5 segundos
-            </p>
+            <p class="progress-text" id="progressText">0%</p>
         </div>
     </div>
 
-    <!-- Librería IA para eliminar fondos de OBJETOS -->
-    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/dist/browser.min.js"></script>
-    
-    <script>
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
+        // Configuración
+        env.allowLocalModels = false;
+        env.useBrowserCache = true;
+
         const video = document.getElementById('video');
         const zoomSlider = document.getElementById('zoomSlider');
         const posXSlider = document.getElementById('posXSlider');
@@ -304,16 +304,61 @@
         const aiTitle = document.getElementById('aiTitle');
         const aiMessage = document.getElementById('aiMessage');
         const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
 
         let stream = null;
         let isCameraActive = false;
         let currentZoom = 1;
         let currentPosX = 0;
         let currentPosY = 0;
-        let currentFacingMode = 'user';
+        let currentFacingMode = 'environment'; // Empieza con cámara trasera
+        let segmenter = null;
+        let modelLoading = false;
 
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        // Cargar modelo IA
+        async function loadModel() {
+            if (segmenter) return segmenter;
+            if (modelLoading) {
+                // Esperar a que termine de cargar
+                while (modelLoading) {
+                    await new Promise(r => setTimeout(r, 500));
+                }
+                return segmenter;
+            }
+            
+            modelLoading = true;
+            aiModal.classList.add('active');
+            aiTitle.textContent = '🤖 Cargando IA...';
+            aiMessage.textContent = 'Descargando modelo (solo la primera vez)';
+            progressFill.style.width = '0%';
+            progressText.textContent = '0%';
+
+            try {
+                segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4', {
+                    progress_callback: (data) => {
+                        if (data.status === 'progress') {
+                            const percent = Math.round((data.progress || 0) * 100);
+                            progressFill.style.width = percent + '%';
+                            progressText.textContent = percent + '%';
+                            aiMessage.textContent = `Descargando modelo: ${percent}%`;
+                        } else if (data.status === 'ready') {
+                            progressFill.style.width = '100%';
+                            progressText.textContent = '100%';
+                            aiMessage.textContent = 'Modelo listo';
+                        }
+                    }
+                });
+                
+                modelLoading = false;
+                return segmenter;
+            } catch (err) {
+                modelLoading = false;
+                throw err;
+            }
         }
 
         async function startCamera() {
@@ -386,109 +431,153 @@
         captureBtn.addEventListener('click', async () => {
             if (!isCameraActive) return;
             
-            // Mostrar modal de procesamiento
-            aiModal.classList.add('active');
-            aiTitle.textContent = ' Capturando...';
-            aiMessage.textContent = 'Tomando la foto con zoom aplicado';
-            progressFill.style.width = '10%';
-
-            // 1. Capturar frame del video con zoom aplicado
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            const vw = video.videoWidth;
-            const vh = video.videoHeight;
+            captureBtn.disabled = true;
             
-            tempCanvas.width = vw;
-            tempCanvas.height = vh;
-            
-            // Aplicar zoom y posición
-            const centerX = vw / 2;
-            const centerY = vh / 2;
-            const panX = (currentPosX / 100) * (vw / 2);
-            const panY = (currentPosY / 100) * (vh / 2);
-            
-            tempCtx.translate(centerX + panX, centerY + panY);
-            tempCtx.scale(currentZoom, currentZoom);
-            tempCtx.translate(-centerX, -centerY);
-            tempCtx.drawImage(video, 0, 0, vw, vh);
-            
-            progressFill.style.width = '30%';
-            aiTitle.textContent = '🤖 IA Analizando...';
-            aiMessage.textContent = 'Detectando el objeto y eliminando el fondo';
-
-            // 2. Procesar con IA (eliminar fondo)
             try {
-                const blob = await tempCanvas.toBlob((b) => b, 'image/png');
+                // 1. Cargar modelo IA
+                const model = await loadModel();
                 
-                // Usar la librería @imgly/background-removal
-                const imageBlob = await imglyRemoveBackground(blob, {
-                    progress: (key, current, total) => {
-                        if (total > 0) {
-                            const percent = 30 + (current / total) * 50;
-                            progressFill.style.width = percent + '%';
-                        }
-                    }
+                aiTitle.textContent = ' Capturando...';
+                aiMessage.textContent = 'Tomando foto con zoom aplicado';
+                progressFill.style.width = '10%';
+                progressText.textContent = '10%';
+
+                // 2. Capturar frame del video con zoom
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const vw = video.videoWidth;
+                const vh = video.videoHeight;
+                
+                tempCanvas.width = vw;
+                tempCanvas.height = vh;
+                
+                const centerX = vw / 2;
+                const centerY = vh / 2;
+                const panX = (currentPosX / 100) * (vw / 2);
+                const panY = (currentPosY / 100) * (vh / 2);
+                
+                tempCtx.translate(centerX + panX, centerY + panY);
+                tempCtx.scale(currentZoom, currentZoom);
+                tempCtx.translate(-centerX, -centerY);
+                tempCtx.drawImage(video, 0, 0, vw, vh);
+                
+                progressFill.style.width = '20%';
+                progressText.textContent = '20%';
+                aiTitle.textContent = '🤖 IA Analizando...';
+                aiMessage.textContent = 'Detectando el objeto y eliminando el fondo';
+
+                // 3. Procesar con IA
+                const result = await model(tempCanvas, {
+                    threshold: 0.5,
+                    mask_threshold: 0.5
                 });
 
-                progressFill.style.width = '85%';
+                progressFill.style.width = '70%';
+                progressText.textContent = '70%';
                 aiTitle.textContent = '✨ Aplicando fondo elegante...';
                 aiMessage.textContent = 'Creando tu imagen profesional';
 
-                // 3. Cargar imagen sin fondo
-                const img = new Image();
-                img.onload = () => {
-                    // Tamaño de salida
-                    const outSize = parseInt(qualitySelect.value);
-                    const outHeight = Math.round(outSize * 0.75);
-                    resultCanvas.width = outSize;
-                    resultCanvas.height = outHeight;
+                // 4. Procesar resultado
+                const mask = result.mask;
+                const maskData = mask.data;
+                const maskWidth = mask.width;
+                const maskHeight = mask.height;
 
-                    // Fondo de color
-                    resultCtx.fillStyle = bgColor.value;
-                    resultCtx.fillRect(0, 0, outSize, outHeight);
+                // Crear canvas con máscara aplicada
+                const processedCanvas = document.createElement('canvas');
+                processedCanvas.width = vw;
+                processedCanvas.height = vh;
+                const pCtx = processedCanvas.getContext('2d');
+                
+                // Dibujar imagen original
+                pCtx.drawImage(tempCanvas, 0, 0);
+                
+                // Aplicar máscara
+                const imageData = pCtx.getImageData(0, 0, vw, vh);
+                const pixels = imageData.data;
+                
+                // Escalar máscara al tamaño de la imagen
+                const maskCanvas = document.createElement('canvas');
+                maskCanvas.width = vw;
+                maskCanvas.height = vh;
+                const mCtx = maskCanvas.getContext('2d');
+                
+                // Dibujar máscara escalada
+                const maskImageData = mCtx.createImageData(vw, vh);
+                for (let y = 0; y < vh; y++) {
+                    for (let x = 0; x < vw; x++) {
+                        const mx = Math.floor((x / vw) * maskWidth);
+                        const my = Math.floor((y / vh) * maskHeight);
+                        const maskIdx = my * maskWidth + mx;
+                        const maskVal = maskData[maskIdx] || 0;
+                        const outIdx = (y * vw + x) * 4;
+                        maskImageData.data[outIdx] = 255;
+                        maskImageData.data[outIdx + 1] = 255;
+                        maskImageData.data[outIdx + 2] = 255;
+                        maskImageData.data[outIdx + 3] = maskVal;
+                    }
+                }
+                mCtx.putImageData(maskImageData, 0, 0);
+                
+                // Usar la máscara para recortar
+                pCtx.globalCompositeOperation = 'destination-in';
+                pCtx.drawImage(maskCanvas, 0, 0);
+                pCtx.globalCompositeOperation = 'source-over';
 
-                    // Dibujar imagen centrada y escalada
-                    const scale = Math.min(outSize / img.width, outHeight / img.height) * 0.95;
-                    const drawW = img.width * scale;
-                    const drawH = img.height * scale;
-                    const x = (outSize - drawW) / 2;
-                    const y = (outHeight - drawH) / 2;
+                // 5. Crear imagen final con fondo
+                const outSize = parseInt(qualitySelect.value);
+                const outHeight = Math.round(outSize * 0.75);
+                resultCanvas.width = outSize;
+                resultCanvas.height = outHeight;
 
-                    // Sombra elegante del objeto
-                    resultCtx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-                    resultCtx.shadowBlur = 30;
-                    resultCtx.shadowOffsetX = 0;
-                    resultCtx.shadowOffsetY = 15;
-                    resultCtx.drawImage(img, x, y, drawW, drawH);
-                    resultCtx.shadowColor = 'transparent';
+                // Fondo de color
+                resultCtx.fillStyle = bgColor.value;
+                resultCtx.fillRect(0, 0, outSize, outHeight);
 
-                    // Marco sutil
-                    resultCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                    resultCtx.lineWidth = 3;
-                    resultCtx.strokeRect(15, 15, outSize - 30, outHeight - 30);
+                // Dibujar objeto centrado
+                const scale = Math.min(outSize / vw, outHeight / vh) * 0.9;
+                const drawW = vw * scale;
+                const drawH = vh * scale;
+                const x = (outSize - drawW) / 2;
+                const y = (outHeight - drawH) / 2;
 
-                    progressFill.style.width = '100%';
-                    aiTitle.textContent = '✅ ¡Listo!';
-                    aiMessage.textContent = 'Tu foto profesional está lista';
+                // Sombra elegante
+                resultCtx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                resultCtx.shadowBlur = 30;
+                resultCtx.shadowOffsetX = 0;
+                resultCtx.shadowOffsetY = 15;
+                resultCtx.drawImage(processedCanvas, x, y, drawW, drawH);
+                resultCtx.shadowColor = 'transparent';
 
-                    setTimeout(() => {
-                        aiModal.classList.remove('active');
-                        resultCanvas.style.display = 'block';
-                        placeholderText.style.display = 'none';
-                        
-                        if (isIOS()) saveHint.style.display = 'block';
+                // Marco sutil
+                resultCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                resultCtx.lineWidth = 3;
+                resultCtx.strokeRect(15, 15, outSize - 30, outHeight - 30);
 
-                        // Descarga automática
-                        const link = document.createElement('a');
-                        link.download = 'object_studio_' + Date.now() + '.png';
-                        link.href = resultCanvas.toDataURL('image/png');
-                        link.click();
-                    }, 800);
-                };
-                img.src = URL.createObjectURL(imageBlob);
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+                aiTitle.textContent = '✅ ¡Listo!';
+                aiMessage.textContent = 'Tu foto profesional está lista';
+
+                setTimeout(() => {
+                    aiModal.classList.remove('active');
+                    resultCanvas.style.display = 'block';
+                    placeholderText.style.display = 'none';
+                    
+                    if (isIOS()) saveHint.style.display = 'block';
+
+                    // Descarga automática
+                    const link = document.createElement('a');
+                    link.download = 'object_studio_' + Date.now() + '.png';
+                    link.href = resultCanvas.toDataURL('image/png');
+                    link.click();
+                    
+                    captureBtn.disabled = false;
+                }, 800);
 
             } catch (err) {
                 aiModal.classList.remove('active');
+                captureBtn.disabled = false;
                 alert('Error al procesar con IA: ' + err.message);
                 console.error(err);
             }
