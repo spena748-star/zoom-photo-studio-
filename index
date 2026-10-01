@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ AI Object Studio Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        .app-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+            max-width: 950px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .app-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .app-header .logo {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, #e94560 0%, #c23152 100%);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5em;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+        }
+        .app-header h1 { color: white; font-size: 1.4em; font-weight: 600; }
+        .app-header .subtitle { color: #a0aec0; font-size: 0.85em; margin-top: 2px; }
+        .app-header .status {
+            margin-left: auto; color: #48bb78; font-size: 0.85em;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .status-dot {
+            width: 10px; height: 10px; background: #48bb78;
+            border-radius: 50%; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        
+        .main-content { display: flex; gap: 0; }
+        .video-section {
+            flex: 1; padding: 25px;
+            display: flex; flex-direction: column; align-items: center;
+            background: #f8f9fc;
+        }
+        .camera-frame {
+            position: relative; width: 100%; max-width: 420px;
+            aspect-ratio: 4/3; background: #000; border-radius: 16px;
+            overflow: hidden; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 3px solid #e2e8f0;
+        }
+        #video {
+            width: 100%; height: 100%; object-fit: cover;
+            transform-origin: center center;
+        }
+        .camera-frame .overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none; border: 2px solid rgba(233, 69, 96, 0.4);
+            border-radius: 13px; z-index: 10;
+        }
+        .camera-frame .corner {
+            position: absolute; width: 25px; height: 25px;
+            border-color: #e94560; border-style: solid; z-index: 11;
+        }
+        .camera-frame .corner.tl { top: 12px; left: 12px; border-width: 4px 0 0 4px; }
+        .camera-frame .corner.tr { top: 12px; right: 12px; border-width: 4px 4px 0 0; }
+        .camera-frame .corner.bl { bottom: 12px; left: 12px; border-width: 0 0 4px 4px; }
+        .camera-frame .corner.br { bottom: 12px; right: 12px; border-width: 0 4px 4px 0; }
+        
+        .controls-panel {
+            width: 340px; padding: 25px; background: white;
+            border-left: 1px solid #e2e8f0;
+        }
+        .control-group { margin-bottom: 20px; }
+        .control-group label {
+            display: block; font-weight: 600; color: #2d3748;
+            margin-bottom: 8px; font-size: 0.9em;
+        }
+        .control-group .value-display { float: right; color: #e94560; font-weight: 700; }
+        input[type="range"] {
+            width: 100%; height: 6px; border-radius: 3px;
+            background: #e2e8f0; outline: none; -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 22px; height: 22px;
+            border-radius: 50%; background: linear-gradient(135deg, #e94560 0%, #c23152 100%);
+            cursor: pointer; box-shadow: 0 2px 8px rgba(233, 69, 96, 0.4);
+        }
+        .btn {
+            width: 100%; padding: 13px 20px; border: none; border-radius: 12px;
+            font-size: 0.95em; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; display: flex; align-items: center;
+            justify-content: center; gap: 8px; margin-bottom: 10px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #e94560 0%, #c23152 100%); color: white; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5); }
+        .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
+        .btn-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+        .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
+        .btn-danger { background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: white; box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3); }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(100, 116, 139, 0.5); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        
+        .preview-section { 
+            padding: 30px; background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%); 
+            border-top: 1px solid #e2e8f0; text-align: center;
+        }
+        .preview-section h3 { color: #2d3748; margin-bottom: 15px; font-size: 1.2em; }
+        .result-wrapper {
+            position: relative;
+            display: inline-block;
+            background: 
+                linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+                linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+                linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        #resultCanvas { 
+            max-width: 100%; border-radius: 8px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: none;
+        }
+        .placeholder-text { color: #a0aec0; font-size: 1.1em; padding: 40px; }
+        .zoom-indicator {
+            position: absolute; bottom: 15px; left: 50%;
+            transform: translateX(-50%); background: rgba(0, 0, 0, 0.75);
+            color: white; padding: 6px 14px; border-radius: 20px;
+            font-size: 0.85em; font-weight: 600; z-index: 12;
+            backdrop-filter: blur(10px);
+        }
+        .save-hint {
+            background: #fef3c7; border-left: 4px solid #f59e0b;
+            padding: 12px; margin-top: 15px; border-radius: 6px;
+            font-size: 0.9em; color: #92400e; display: none;
+        }
+        
+        /* Modal de procesamiento IA */
+        .ai-modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 12, 41, 0.95);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; backdrop-filter: blur(10px);
+        }
+        .ai-modal.active { display: flex; }
+        .ai-modal-content {
+            background: white; border-radius: 24px; padding: 40px;
+            max-width: 400px; width: 90%; text-align: center;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+        }
+        .ai-spinner {
+            width: 70px; height: 70px; margin: 0 auto 20px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid #e94560;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .ai-modal h2 { color: #2d3748; margin-bottom: 10px; font-size: 1.4em; }
+        .ai-modal p { color: #718096; margin-bottom: 20px; }
+        .progress-bar {
+            width: 100%; height: 8px; background: #e2e8f0;
+            border-radius: 4px; overflow: hidden; margin-top: 15px;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, #e94560, #f59e0b);
+            width: 0%; transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content { flex-direction: column; }
+            .controls-panel { width: 100%; border-left: none; border-top: 1px solid #e2e8f0; }
+            .app-header h1 { font-size: 1.1em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <div class="logo">✨</div>
+            <div>
+                <h1>AI Object Studio Pro</h1>
+                <div class="subtitle">Elimina fondos con IA profesional</div>
+            </div>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span id="statusText">Listo</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="camera-frame" id="cameraFrame">
+                    <video id="video" autoplay playsinline muted></video>
+                    <div class="overlay"></div>
+                    <div class="corner tl"></div><div class="corner tr"></div>
+                    <div class="corner bl"></div><div class="corner br"></div>
+                    <div class="zoom-indicator" id="zoomIndicator">1.0x</div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>🔍 Zoom <span class="value-display" id="zoomValue">1.0x</span></label>
+                    <input type="range" id="zoomSlider" min="1" max="4" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <label>↔️ Posición X <span class="value-display" id="posXValue">0</span></label>
+                    <input type="range" id="posXSlider" min="-100" max="100" step="1" value="0">
+                </div>
+                <div class="control-group">
+                    <label>↕️ Posición Y <span class="value-display" id="posYValue">0</span></label>
+                    <input type="range" id="posYSlider" min="-100" max="100" step="1" value="0">
+                </div>
+                <div class="control-group">
+                    <label>🎨 Color de Fondo</label>
+                    <input type="color" id="bgColor" value="#ffffff" style="width: 100%; height: 45px; border: none; border-radius: 8px; cursor: pointer;">
+                </div>
+                <div class="control-group">
+                    <label>📐 Calidad de salida</label>
+                    <select id="qualitySelect" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.9em;">
+                        <option value="800">Alta (800px)</option>
+                        <option value="1200" selected>Ultra (1200px)</option>
+                        <option value="1600">Máxima (1600px)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" id="startBtn">📷 Iniciar Cámara</button>
+                <button class="btn btn-warning" id="switchCameraBtn" disabled>🔄 Cambiar Cámara</button>
+                <button class="btn btn-success" id="captureBtn" disabled>✨ Capturar y Procesar con IA</button>
+                <button class="btn btn-danger" id="stopBtn" disabled>⏹️ Detener</button>
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <h3> Resultado Profesional</h3>
+            <div class="result-wrapper">
+                <canvas id="resultCanvas" width="1200" height="900"></canvas>
+                <p class="placeholder-text" id="placeholderText">Captura una foto y la IA eliminará el fondo automáticamente</p>
+            </div>
+            <p class="save-hint" id="saveHint">
+                💡 <strong>iPhone:</strong> Mantén presionada la imagen → "Guardar en Fotos"<br>
+                💡 <strong>Android:</strong> Se descargó automáticamente
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal de procesamiento IA -->
+    <div class="ai-modal" id="aiModal">
+        <div class="ai-modal-content">
+            <div class="ai-spinner"></div>
+            <h2 id="aiTitle">Procesando con IA...</h2>
+            <p id="aiMessage">Eliminando fondo de tu objeto</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p style="font-size: 0.85em; color: #a0aec0; margin-top: 15px;">
+                Primera vez: ~15-30 segundos<br>
+                Siguientes: ~3-5 segundos
+            </p>
+        </div>
+    </div>
+
+    <!-- Librería IA para eliminar fondos de OBJETOS -->
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/dist/browser.min.js"></script>
+    
+    <script>
+        const video = document.getElementById('video');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const posXSlider = document.getElementById('posXSlider');
+        const posYSlider = document.getElementById('posYSlider');
+        const bgColor = document.getElementById('bgColor');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const startBtn = document.getElementById('startBtn');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resultCanvas = document.getElementById('resultCanvas');
+        const resultCtx = resultCanvas.getContext('2d');
+        const zoomIndicator = document.getElementById('zoomIndicator');
+        const statusText = document.getElementById('statusText');
+        const placeholderText = document.getElementById('placeholderText');
+        const saveHint = document.getElementById('saveHint');
+        const aiModal = document.getElementById('aiModal');
+        const aiTitle = document.getElementById('aiTitle');
+        const aiMessage = document.getElementById('aiMessage');
+        const progressFill = document.getElementById('progressFill');
+
+        let stream = null;
+        let isCameraActive = false;
+        let currentZoom = 1;
+        let currentPosX = 0;
+        let currentPosY = 0;
+        let currentFacingMode = 'user';
+
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        async function startCamera() {
+            try {
+                if (stream) stream.getTracks().forEach(track => track.stop());
+                
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: currentFacingMode, 
+                        width: { ideal: 1920 }, 
+                        height: { ideal: 1080 } 
+                    }
+                });
+                
+                video.srcObject = stream;
+                await video.play();
+                
+                isCameraActive = true;
+                statusText.textContent = currentFacingMode === 'user' ? 'Frontal' : 'Trasera';
+                startBtn.disabled = true;
+                switchCameraBtn.disabled = false;
+                captureBtn.disabled = false;
+                stopBtn.disabled = false;
+                placeholderText.style.display = 'none';
+            } catch (err) {
+                alert('Error al acceder a la cámara: ' + err.message);
+            }
+        }
+
+        startBtn.addEventListener('click', startCamera);
+
+        switchCameraBtn.addEventListener('click', async () => {
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            await startCamera();
+        });
+
+        stopBtn.addEventListener('click', () => {
+            isCameraActive = false;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                stream = null;
+            }
+            startBtn.disabled = false;
+            switchCameraBtn.disabled = true;
+            captureBtn.disabled = true;
+            stopBtn.disabled = true;
+            statusText.textContent = 'Detenido';
+        });
+
+        function updateZoom() {
+            currentZoom = parseFloat(zoomSlider.value);
+            currentPosX = parseInt(posXSlider.value);
+            currentPosY = parseInt(posYSlider.value);
+            document.getElementById('zoomValue').textContent = currentZoom.toFixed(1) + 'x';
+            document.getElementById('posXValue').textContent = currentPosX;
+            document.getElementById('posYValue').textContent = currentPosY;
+            zoomIndicator.textContent = currentZoom.toFixed(1) + 'x';
+
+            const translateX = currentPosX * 0.5;
+            const translateY = currentPosY * 0.5;
+            video.style.transform = `scale(${currentZoom}) translate(${translateX}%, ${translateY}%)`;
+        }
+
+        zoomSlider.addEventListener('input', updateZoom);
+        posXSlider.addEventListener('input', updateZoom);
+        posYSlider.addEventListener('input', updateZoom);
+
+        // Capturar y procesar con IA
+        captureBtn.addEventListener('click', async () => {
+            if (!isCameraActive) return;
+            
+            // Mostrar modal de procesamiento
+            aiModal.classList.add('active');
+            aiTitle.textContent = ' Capturando...';
+            aiMessage.textContent = 'Tomando la foto con zoom aplicado';
+            progressFill.style.width = '10%';
+
+            // 1. Capturar frame del video con zoom aplicado
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            const vw = video.videoWidth;
+            const vh = video.videoHeight;
+            
+            tempCanvas.width = vw;
+            tempCanvas.height = vh;
+            
+            // Aplicar zoom y posición
+            const centerX = vw / 2;
+            const centerY = vh / 2;
+            const panX = (currentPosX / 100) * (vw / 2);
+            const panY = (currentPosY / 100) * (vh / 2);
+            
+            tempCtx.translate(centerX + panX, centerY + panY);
+            tempCtx.scale(currentZoom, currentZoom);
+            tempCtx.translate(-centerX, -centerY);
+            tempCtx.drawImage(video, 0, 0, vw, vh);
+            
+            progressFill.style.width = '30%';
+            aiTitle.textContent = '🤖 IA Analizando...';
+            aiMessage.textContent = 'Detectando el objeto y eliminando el fondo';
+
+            // 2. Procesar con IA (eliminar fondo)
+            try {
+                const blob = await tempCanvas.toBlob((b) => b, 'image/png');
+                
+                // Usar la librería @imgly/background-removal
+                const imageBlob = await imglyRemoveBackground(blob, {
+                    progress: (key, current, total) => {
+                        if (total > 0) {
+                            const percent = 30 + (current / total) * 50;
+                            progressFill.style.width = percent + '%';
+                        }
+                    }
+                });
+
+                progressFill.style.width = '85%';
+                aiTitle.textContent = '✨ Aplicando fondo elegante...';
+                aiMessage.textContent = 'Creando tu imagen profesional';
+
+                // 3. Cargar imagen sin fondo
+                const img = new Image();
+                img.onload = () => {
+                    // Tamaño de salida
+                    const outSize = parseInt(qualitySelect.value);
+                    const outHeight = Math.round(outSize * 0.75);
+                    resultCanvas.width = outSize;
+                    resultCanvas.height = outHeight;
+
+                    // Fondo de color
+                    resultCtx.fillStyle = bgColor.value;
+                    resultCtx.fillRect(0, 0, outSize, outHeight);
+
+                    // Dibujar imagen centrada y escalada
+                    const scale = Math.min(outSize / img.width, outHeight / img.height) * 0.95;
+                    const drawW = img.width * scale;
+                    const drawH = img.height * scale;
+                    const x = (outSize - drawW) / 2;
+                    const y = (outHeight - drawH) / 2;
+
+                    // Sombra elegante del objeto
+                    resultCtx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+                    resultCtx.shadowBlur = 30;
+                    resultCtx.shadowOffsetX = 0;
+                    resultCtx.shadowOffsetY = 15;
+                    resultCtx.drawImage(img, x, y, drawW, drawH);
+                    resultCtx.shadowColor = 'transparent';
+
+                    // Marco sutil
+                    resultCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    resultCtx.lineWidth = 3;
+                    resultCtx.strokeRect(15, 15, outSize - 30, outHeight - 30);
+
+                    progressFill.style.width = '100%';
+                    aiTitle.textContent = '✅ ¡Listo!';
+                    aiMessage.textContent = 'Tu foto profesional está lista';
+
+                    setTimeout(() => {
+                        aiModal.classList.remove('active');
+                        resultCanvas.style.display = 'block';
+                        placeholderText.style.display = 'none';
+                        
+                        if (isIOS()) saveHint.style.display = 'block';
+
+                        // Descarga automática
+                        const link = document.createElement('a');
+                        link.download = 'object_studio_' + Date.now() + '.png';
+                        link.href = resultCanvas.toDataURL('image/png');
+                        link.click();
+                    }, 800);
+                };
+                img.src = URL.createObjectURL(imageBlob);
+
+            } catch (err) {
+                aiModal.classList.remove('active');
+                alert('Error al procesar con IA: ' + err.message);
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>
