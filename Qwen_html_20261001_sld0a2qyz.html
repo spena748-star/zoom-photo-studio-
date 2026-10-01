@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Zoom Photo Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .app-header .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2d8cff 0%, #0070e0 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .app-header h1 {
+            color: white;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .app-header .status {
+            margin-left: auto;
+            color: #48bb78;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #48bb78;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            display: flex;
+            gap: 0;
+        }
+
+        .video-section {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .zoom-frame {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 4/3;
+            background: #f7fafc;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 3px solid #e2e8f0;
+        }
+
+        .zoom-frame video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+
+        .zoom-frame .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            border: 2px solid rgba(45, 140, 255, 0.3);
+            border-radius: 14px;
+        }
+
+        .zoom-frame .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: #2d8cff;
+            border-style: solid;
+        }
+
+        .zoom-frame .corner.tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; }
+        .zoom-frame .corner.tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; }
+        .zoom-frame .corner.bl { bottom: 10px; left: 10px; border-width: 0 0 3px 3px; }
+        .zoom-frame .corner.br { bottom: 10px; right: 10px; border-width: 0 3px 3px 0; }
+
+        .controls-panel {
+            width: 320px;
+            padding: 30px;
+            background: #f8fafc;
+            border-left: 1px solid #e2e8f0;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .control-group .value-display {
+            float: right;
+            color: #2d8cff;
+            font-weight: 700;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2d8cff 0%, #0070e0 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(45, 140, 255, 0.4);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2d8cff 0%, #0070e0 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(45, 140, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 140, 255, 0.5);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.5);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(252, 129, 129, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(252, 129, 129, 0.5);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .preview-section {
+            padding: 30px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .preview-section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        #resultCanvas {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .placeholder-text {
+            color: #a0aec0;
+            font-size: 1.1em;
+            padding: 40px;
+        }
+
+        .zoom-indicator {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .controls-panel {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <div class="logo">📸</div>
+            <h1>Zoom Photo Studio</h1>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span id="statusText">Listo</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="zoom-frame" id="zoomFrame">
+                    <video id="video" autoplay playsinline muted></video>
+                    <div class="overlay"></div>
+                    <div class="corner tl"></div>
+                    <div class="corner tr"></div>
+                    <div class="corner bl"></div>
+                    <div class="corner br"></div>
+                    <div class="zoom-indicator" id="zoomIndicator">1.0x</div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>
+                        🔍 Zoom
+                        <span class="value-display" id="zoomValue">1.0x</span>
+                    </label>
+                    <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1">
+                </div>
+
+                <div class="control-group">
+                    <label>
+                         Posición X
+                        <span class="value-display" id="posXValue">0</span>
+                    </label>
+                    <input type="range" id="posXSlider" min="-100" max="100" step="1" value="0">
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        📐 Posición Y
+                        <span class="value-display" id="posYValue">0</span>
+                    </label>
+                    <input type="range" id="posYSlider" min="-100" max="100" step="1" value="0">
+                </div>
+
+                <div class="control-group">
+                    <label>🎨 Color de Fondo</label>
+                    <input type="color" id="bgColor" value="#ffffff" style="width: 100%; height: 45px; border: none; border-radius: 8px; cursor: pointer;">
+                </div>
+
+                <button class="btn btn-primary" id="startBtn">
+                    📷 Iniciar Cámara
+                </button>
+
+                <button class="btn btn-success" id="captureBtn" disabled>
+                    📸 Capturar Foto
+                </button>
+
+                <button class="btn btn-danger" id="stopBtn" disabled>
+                    ⏹️ Detener Cámara
+                </button>
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <h3>️ Vista Previa del Resultado</h3>
+            <canvas id="resultCanvas" width="800" height="600"></canvas>
+            <p class="placeholder-text" id="placeholderText">Captura una foto para ver el resultado</p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const posXSlider = document.getElementById('posXSlider');
+        const posYSlider = document.getElementById('posYSlider');
+        const bgColor = document.getElementById('bgColor');
+        const startBtn = document.getElementById('startBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resultCanvas = document.getElementById('resultCanvas');
+        const resultCtx = resultCanvas.getContext('2d');
+        const zoomIndicator = document.getElementById('zoomIndicator');
+        const statusText = document.getElementById('statusText');
+        const placeholderText = document.getElementById('placeholderText');
+
+        let stream = null;
+        let currentZoom = 1;
+        let currentPosX = 0;
+        let currentPosY = 0;
+
+        // Iniciar cámara
+        startBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                video.srcObject = stream;
+                startBtn.disabled = true;
+                captureBtn.disabled = false;
+                stopBtn.disabled = false;
+                statusText.textContent = 'En vivo';
+                placeholderText.style.display = 'none';
+            } catch (err) {
+                alert('Error al acceder a la cámara: ' + err.message);
+            }
+        });
+
+        // Detener cámara
+        stopBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                startBtn.disabled = false;
+                captureBtn.disabled = true;
+                stopBtn.disabled = true;
+                statusText.textContent = 'Detenido';
+            }
+        });
+
+        // Actualizar zoom en vivo
+        function updateZoom() {
+            currentZoom = parseFloat(zoomSlider.value);
+            currentPosX = parseInt(posXSlider.value);
+            currentPosY = parseInt(posYSlider.value);
+
+            document.getElementById('zoomValue').textContent = currentZoom.toFixed(1) + 'x';
+            document.getElementById('posXValue').textContent = currentPosX;
+            document.getElementById('posYValue').textContent = currentPosY;
+            zoomIndicator.textContent = currentZoom.toFixed(1) + 'x';
+
+            // Aplicar transform al video
+            const translateX = currentPosX * 0.5;
+            const translateY = currentPosY * 0.5;
+            video.style.transform = `scale(${currentZoom}) translate(${translateX}%, ${translateY}%)`;
+        }
+
+        zoomSlider.addEventListener('input', updateZoom);
+        posXSlider.addEventListener('input', updateZoom);
+        posYSlider.addEventListener('input', updateZoom);
+
+        // Capturar foto
+        captureBtn.addEventListener('click', () => {
+            const width = 800;
+            const height = 600;
+            resultCanvas.width = width;
+            resultCanvas.height = height;
+
+            // Fondo elegante
+            const color = bgColor.value;
+            resultCtx.fillStyle = color;
+            resultCtx.fillRect(0, 0, width, height);
+
+            // Dibujar video con zoom
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+
+            if (videoWidth && videoHeight) {
+                const scale = Math.max(width / videoWidth, height / videoHeight) * currentZoom;
+                const drawWidth = videoWidth * scale;
+                const drawHeight = videoHeight * scale;
+
+                const offsetX = (currentPosX / 100) * (drawWidth - width) / 2;
+                const offsetY = (currentPosY / 100) * (drawHeight - height) / 2;
+
+                const x = (width - drawWidth) / 2 - offsetX;
+                const y = (height - drawHeight) / 2 - offsetY;
+
+                resultCtx.drawImage(video, x, y, drawWidth, drawHeight);
+            }
+
+            // Añadir marco elegante
+            resultCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            resultCtx.lineWidth = 4;
+            resultCtx.strokeRect(10, 10, width - 20, height - 20);
+
+            // Sombra interior
+            const gradient = resultCtx.createRadialGradient(
+                width / 2, height / 2, 0,
+                width / 2, height / 2, width / 2
+            );
+            gradient.addColorStop(0, 'rgba(0,0,0,0)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0.1)');
+            resultCtx.fillStyle = gradient;
+            resultCtx.fillRect(0, 0, width, height);
+
+            // Mostrar canvas
+            resultCanvas.style.display = 'block';
+            placeholderText.style.display = 'none';
+
+            // Auto-descarga
+            const link = document.createElement('a');
+            link.download = 'zoom_photo_' + Date.now() + '.png';
+            link.href = resultCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // Inicializar
+        resultCanvas.style.display = 'none';
+    </script>
+</body>
+</html>
