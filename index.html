@@ -2,274 +2,408 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ AI Object Studio Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>✨ AI Object Studio</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
+            color: white;
+            overflow-x: hidden;
         }
-        .app-container {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
-            max-width: 950px;
-            width: 100%;
-            overflow: hidden;
-        }
-        .app-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 20px 30px;
+
+        /* HEADER COMPACTO */
+        .header {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 12px 16px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+            border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .app-header .logo {
-            width: 45px; height: 45px;
-            background: linear-gradient(135deg, #e94560 0%, #c23152 100%);
-            border-radius: 12px;
+        .header .logo {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #e94560, #c23152);
+            border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.5em;
-            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+            font-size: 1.3em;
+            box-shadow: 0 2px 10px rgba(233, 69, 96, 0.5);
         }
-        .app-header h1 { color: white; font-size: 1.3em; font-weight: 600; }
-        .app-header .subtitle { color: #a0aec0; font-size: 0.8em; margin-top: 2px; }
-        .app-header .status {
-            margin-left: auto; color: #48bb78; font-size: 0.85em;
-            display: flex; align-items: center; gap: 8px;
+        .header h1 { font-size: 1.1em; font-weight: 700; }
+        .header .status {
+            margin-left: auto;
+            font-size: 0.75em;
+            color: #48bb78;
+            display: flex; align-items: center; gap: 5px;
         }
         .status-dot {
-            width: 10px; height: 10px; background: #48bb78;
+            width: 8px; height: 8px; background: #48bb78;
             border-radius: 50%; animation: pulse 2s infinite;
         }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        
-        .main-content { display: flex; gap: 0; }
-        .video-section {
-            flex: 1; padding: 25px;
-            display: flex; flex-direction: column; align-items: center;
-            background: #f8f9fc;
+
+        /* CÁMARA CON DRAG */
+        .camera-container {
+            position: relative;
+            width: 100%;
+            padding: 15px;
+            background: #0f0c29;
         }
-        .camera-frame {
-            position: relative; width: 100%; max-width: 420px;
-            aspect-ratio: 4/3; background: #000; border-radius: 16px;
-            overflow: hidden; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            border: 3px solid #e2e8f0;
+        .camera-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(233, 69, 96, 0.4);
+            touch-action: none;
+            cursor: grab;
+        }
+        .camera-wrapper:active { cursor: grabbing; }
+        .camera-wrapper.dragging {
+            border-color: #e94560;
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.6);
         }
         #video {
-            width: 100%; height: 100%; object-fit: cover;
+            width: 100%; height: 100%;
+            object-fit: cover;
             transform-origin: center center;
+            pointer-events: none;
         }
-        .camera-frame .overlay {
+        .camera-overlay {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            pointer-events: none; border: 2px solid rgba(233, 69, 96, 0.4);
-            border-radius: 13px; z-index: 10;
+            pointer-events: none;
+            border: 2px solid rgba(233, 69, 96, 0.3);
+            border-radius: 14px;
         }
-        .camera-frame .corner {
-            position: absolute; width: 25px; height: 25px;
-            border-color: #e94560; border-style: solid; z-index: 11;
+        .corner {
+            position: absolute; width: 20px; height: 20px;
+            border-color: #e94560; border-style: solid;
         }
-        .camera-frame .corner.tl { top: 12px; left: 12px; border-width: 4px 0 0 4px; }
-        .camera-frame .corner.tr { top: 12px; right: 12px; border-width: 4px 4px 0 0; }
-        .camera-frame .corner.bl { bottom: 12px; left: 12px; border-width: 0 0 4px 4px; }
-        .camera-frame .corner.br { bottom: 12px; right: 12px; border-width: 0 4px 4px 0; }
+        .corner.tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; }
+        .corner.tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; }
+        .corner.bl { bottom: 10px; left: 10px; border-width: 0 0 3px 3px; }
+        .corner.br { bottom: 10px; right: 10px; border-width: 0 3px 3px 0; }
         
-        .controls-panel {
-            width: 340px; padding: 25px; background: white;
-            border-left: 1px solid #e2e8f0;
+        .zoom-badge {
+            position: absolute; bottom: 12px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white; padding: 5px 12px;
+            border-radius: 15px; font-size: 0.8em; font-weight: 600;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
         }
-        .control-group { margin-bottom: 20px; }
-        .control-group label {
-            display: block; font-weight: 600; color: #2d3748;
-            margin-bottom: 8px; font-size: 0.9em;
+        .drag-hint {
+            position: absolute; top: 12px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(233, 69, 96, 0.9);
+            color: white; padding: 5px 12px;
+            border-radius: 15px; font-size: 0.75em; font-weight: 600;
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none;
         }
-        .control-group .value-display { float: right; color: #e94560; font-weight: 700; }
+        .camera-wrapper:hover .drag-hint,
+        .camera-wrapper.dragging .drag-hint { opacity: 1; }
+
+        /* CONTROLES EN CASCADA */
+        .controls {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        }
+        .control-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 14px;
+            backdrop-filter: blur(10px);
+        }
+        .control-card label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            color: #e2e8f0;
+        }
+        .control-card label span {
+            color: #e94560;
+            font-weight: 700;
+            font-size: 0.95em;
+        }
         input[type="range"] {
-            width: 100%; height: 6px; border-radius: 3px;
-            background: #e2e8f0; outline: none; -webkit-appearance: none;
+            width: 100%; height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none; -webkit-appearance: none;
         }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 22px; height: 22px;
-            border-radius: 50%; background: linear-gradient(135deg, #e94560 0%, #c23152 100%);
-            cursor: pointer; box-shadow: 0 2px 8px rgba(233, 69, 96, 0.4);
+            -webkit-appearance: none;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #c23152);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(233, 69, 96, 0.5);
+        }
+        input[type="color"] {
+            width: 100%; height: 45px;
+            border: none; border-radius: 10px;
+            cursor: pointer; background: transparent;
+        }
+        select {
+            width: 100%; padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: white; font-size: 0.9em;
+        }
+
+        /* BOTONES */
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0 15px 15px;
         }
         .btn {
-            width: 100%; padding: 13px 20px; border: none; border-radius: 12px;
-            font-size: 0.95em; font-weight: 600; cursor: pointer;
-            transition: all 0.3s ease; display: flex; align-items: center;
-            justify-content: center; gap: 8px; margin-bottom: 10px;
+            width: 100%; padding: 14px;
+            border: none; border-radius: 12px;
+            font-size: 0.95em; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .btn-primary { background: linear-gradient(135deg, #e94560 0%, #c23152 100%); color: white; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3); }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5); }
-        .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-        .btn-success:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
-        .btn-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-        .btn-warning:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
-        .btn-danger { background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: white; box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3); }
-        .btn-danger:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(100, 116, 139, 0.5); }
+        .btn:active { transform: scale(0.97); }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        
-        .preview-section { 
-            padding: 30px; background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%); 
-            border-top: 1px solid #e2e8f0; text-align: center;
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #c23152);
+            color: white;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
         }
-        .preview-section h3 { color: #2d3748; margin-bottom: 15px; font-size: 1.2em; }
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+        }
+        .btn-capture {
+            background: linear-gradient(135deg, #e94560, #f59e0b);
+            color: white;
+            box-shadow: 0 6px 25px rgba(233, 69, 96, 0.5);
+            font-size: 1.1em;
+            padding: 16px;
+        }
+
+        /* RESULTADO */
+        .result-section {
+            padding: 15px;
+            background: #0f0c29;
+            text-align: center;
+        }
+        .result-section h3 {
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            color: #e2e8f0;
+        }
         .result-wrapper {
-            position: relative;
-            display: inline-block;
             background: 
-                linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
-                linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
-                linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+                linear-gradient(45deg, #2d3748 25%, transparent 25%),
+                linear-gradient(-45deg, #2d3748 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #2d3748 75%),
+                linear-gradient(-45deg, transparent 75%, #2d3748 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
             border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
-        #resultCanvas { 
-            max-width: 100%; border-radius: 8px; 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        #resultCanvas {
+            max-width: 100%;
+            border-radius: 8px;
             display: none;
         }
-        .placeholder-text { color: #a0aec0; font-size: 1em; padding: 30px; }
-        .zoom-indicator {
-            position: absolute; bottom: 15px; left: 50%;
-            transform: translateX(-50%); background: rgba(0, 0, 0, 0.75);
-            color: white; padding: 6px 14px; border-radius: 20px;
-            font-size: 0.85em; font-weight: 600; z-index: 12;
+        .placeholder-text {
+            color: #718096;
+            font-size: 0.95em;
+            padding: 30px 15px;
         }
         .save-hint {
-            background: #fef3c7; border-left: 4px solid #f59e0b;
-            padding: 12px; margin-top: 15px; border-radius: 6px;
-            font-size: 0.9em; color: #92400e; display: none;
+            background: rgba(245, 158, 11, 0.2);
+            border-left: 3px solid #f59e0b;
+            padding: 10px;
+            margin-top: 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            color: #fbbf24;
+            display: none;
+            text-align: left;
         }
-        
+
+        /* MODAL IA */
         .ai-modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 12, 41, 0.95);
+            background: rgba(15, 12, 41, 0.97);
             display: none; align-items: center; justify-content: center;
-            z-index: 1000; backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 20px;
         }
         .ai-modal.active { display: flex; }
         .ai-modal-content {
-            background: white; border-radius: 24px; padding: 35px;
-            max-width: 400px; width: 90%; text-align: center;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            border-radius: 20px;
+            padding: 30px 25px;
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
         }
         .ai-spinner {
-            width: 60px; height: 60px; margin: 0 auto 20px;
-            border: 5px solid #e2e8f0;
-            border-top: 5px solid #e94560;
+            width: 50px; height: 50px; margin: 0 auto 15px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #e94560;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .ai-modal h2 { color: #2d3748; margin-bottom: 10px; font-size: 1.3em; }
-        .ai-modal p { color: #718096; margin-bottom: 10px; font-size: 0.95em; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ai-modal h2 { font-size: 1.2em; margin-bottom: 8px; }
+        .ai-modal p { color: #a0aec0; font-size: 0.9em; margin-bottom: 15px; }
         .progress-bar {
-            width: 100%; height: 10px; background: #e2e8f0;
-            border-radius: 5px; overflow: hidden; margin-top: 15px;
+            width: 100%; height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px; overflow: hidden;
         }
         .progress-fill {
-            height: 100%; background: linear-gradient(90deg, #e94560, #f59e0b);
-            width: 0%; transition: width 0.3s ease;
-            border-radius: 5px;
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #f59e0b);
+            width: 0%; transition: width 0.3s;
         }
         .progress-text {
-            font-size: 0.85em; color: #a0aec0; margin-top: 10px;
+            font-size: 0.85em; color: #718096; margin-top: 10px;
         }
-        
-        @media (max-width: 768px) {
-            .main-content { flex-direction: column; }
-            .controls-panel { width: 100%; border-left: none; border-top: 1px solid #e2e8f0; }
-            .app-header h1 { font-size: 1.1em; }
+
+        /* BOTÓN FLOTANTE DE MOVER */
+        .float-move-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #e94560, #c23152);
+            border-radius: 50%;
+            display: none;
+            align-items: center; justify-content: center;
+            font-size: 1.5em;
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5);
+            z-index: 50;
+            cursor: pointer;
+            animation: float 2s ease-in-out infinite;
         }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .float-move-btn.active { display: flex; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="app-header">
-            <div class="logo">✨</div>
-            <div>
-                <h1>AI Object Studio Pro</h1>
-                <div class="subtitle">Elimina fondos con IA profesional</div>
-            </div>
-            <div class="status">
-                <div class="status-dot"></div>
-                <span id="statusText">Listo</span>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="video-section">
-                <div class="camera-frame" id="cameraFrame">
-                    <video id="video" autoplay playsinline muted></video>
-                    <div class="overlay"></div>
-                    <div class="corner tl"></div><div class="corner tr"></div>
-                    <div class="corner bl"></div><div class="corner br"></div>
-                    <div class="zoom-indicator" id="zoomIndicator">1.0x</div>
-                </div>
-            </div>
-
-            <div class="controls-panel">
-                <div class="control-group">
-                    <label>🔍 Zoom <span class="value-display" id="zoomValue">1.0x</span></label>
-                    <input type="range" id="zoomSlider" min="1" max="4" step="0.1" value="1">
-                </div>
-                <div class="control-group">
-                    <label>↔️ Posición X <span class="value-display" id="posXValue">0</span></label>
-                    <input type="range" id="posXSlider" min="-100" max="100" step="1" value="0">
-                </div>
-                <div class="control-group">
-                    <label>↕️ Posición Y <span class="value-display" id="posYValue">0</span></label>
-                    <input type="range" id="posYSlider" min="-100" max="100" step="1" value="0">
-                </div>
-                <div class="control-group">
-                    <label>🎨 Color de Fondo</label>
-                    <input type="color" id="bgColor" value="#ffffff" style="width: 100%; height: 45px; border: none; border-radius: 8px; cursor: pointer;">
-                </div>
-                <div class="control-group">
-                    <label>📐 Calidad de salida</label>
-                    <select id="qualitySelect" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.9em;">
-                        <option value="800">Alta (800px)</option>
-                        <option value="1200" selected>Ultra (1200px)</option>
-                        <option value="1600">Máxima (1600px)</option>
-                    </select>
-                </div>
-
-                <button class="btn btn-primary" id="startBtn">📷 Iniciar Cámara</button>
-                <button class="btn btn-warning" id="switchCameraBtn" disabled>🔄 Cambiar Cámara</button>
-                <button class="btn btn-success" id="captureBtn" disabled>✨ Capturar y Procesar con IA</button>
-                <button class="btn btn-danger" id="stopBtn" disabled>⏹️ Detener</button>
-            </div>
-        </div>
-
-        <div class="preview-section">
-            <h3>🎯 Resultado Profesional</h3>
-            <div class="result-wrapper">
-                <canvas id="resultCanvas" width="1200" height="900"></canvas>
-                <p class="placeholder-text" id="placeholderText">Captura una foto y la IA eliminará el fondo automáticamente</p>
-            </div>
-            <p class="save-hint" id="saveHint">
-                💡 <strong>iPhone:</strong> Mantén presionada la imagen → "Guardar en Fotos"<br>
-                💡 <strong>Android:</strong> Se descargó automáticamente
-            </p>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">✨</div>
+        <h1>AI Object Studio</h1>
+        <div class="status">
+            <div class="status-dot"></div>
+            <span id="statusText">Listo</span>
         </div>
     </div>
 
+    <!-- CÁMARA -->
+    <div class="camera-container">
+        <div class="camera-wrapper" id="cameraWrapper">
+            <video id="video" autoplay playsinline muted></video>
+            <div class="camera-overlay"></div>
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            <div class="drag-hint">✋ Arrastra para mover</div>
+            <div class="zoom-badge" id="zoomIndicator">1.0x</div>
+        </div>
+    </div>
+
+    <!-- CONTROLES EN CASCADA -->
+    <div class="controls">
+        <div class="control-card">
+            <label>🔍 Zoom <span id="zoomValue">1.0x</span></label>
+            <input type="range" id="zoomSlider" min="1" max="4" step="0.1" value="1">
+        </div>
+        
+        <div class="control-card">
+            <label>🎨 Color de Fondo</label>
+            <input type="color" id="bgColor" value="#ffffff">
+        </div>
+
+        <div class="control-card">
+            <label>📐 Calidad</label>
+            <select id="qualitySelect">
+                <option value="800">Alta (800px)</option>
+                <option value="1200" selected>Ultra (1200px)</option>
+                <option value="1600">Máxima (1600px)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="buttons">
+        <button class="btn btn-primary" id="startBtn"> Iniciar Cámara</button>
+        <button class="btn btn-warning" id="switchCameraBtn" disabled>🔄 Cambiar Cámara</button>
+        <button class="btn btn-capture" id="captureBtn" disabled>✨ Capturar con IA</button>
+        <button class="btn btn-danger" id="stopBtn" disabled>⏹️ Detener</button>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="result-section">
+        <h3>🎯 Resultado</h3>
+        <div class="result-wrapper">
+            <canvas id="resultCanvas" width="1200" height="900"></canvas>
+            <p class="placeholder-text" id="placeholderText">Captura una foto y la IA quitará el fondo</p>
+        </div>
+        <p class="save-hint" id="saveHint">
+            💡 <strong>iPhone:</strong> Mantén presionada la imagen<br>
+            💡 <strong>Android:</strong> Se descarga sola
+        </p>
+    </div>
+
+    <!-- BOTÓN FLOTANTE -->
+    <div class="float-move-btn" id="floatMoveBtn">✋</div>
+
+    <!-- MODAL IA -->
     <div class="ai-modal" id="aiModal">
         <div class="ai-modal-content">
             <div class="ai-spinner"></div>
-            <h2 id="aiTitle">Preparando IA...</h2>
-            <p id="aiMessage">Cargando modelo de inteligencia artificial</p>
+            <h2 id="aiTitle">Cargando IA...</h2>
+            <p id="aiMessage">Preparando modelo</p>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
@@ -278,16 +412,11 @@
     </div>
 
     <script type="module">
-        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
-
-        // Configuración
-        env.allowLocalModels = false;
-        env.useBrowserCache = true;
+        import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm';
 
         const video = document.getElementById('video');
+        const cameraWrapper = document.getElementById('cameraWrapper');
         const zoomSlider = document.getElementById('zoomSlider');
-        const posXSlider = document.getElementById('posXSlider');
-        const posYSlider = document.getElementById('posYSlider');
         const bgColor = document.getElementById('bgColor');
         const qualitySelect = document.getElementById('qualitySelect');
         const startBtn = document.getElementById('startBtn');
@@ -305,15 +434,13 @@
         const aiMessage = document.getElementById('aiMessage');
         const progressFill = document.getElementById('progressFill');
         const progressText = document.getElementById('progressText');
+        const floatMoveBtn = document.getElementById('floatMoveBtn');
 
         let stream = null;
         let isCameraActive = false;
         let currentZoom = 1;
-        let currentPosX = 0;
-        let currentPosY = 0;
-        let currentFacingMode = 'environment'; // Empieza con cámara trasera
-        let segmenter = null;
-        let modelLoading = false;
+        let currentFacingMode = 'environment';
+        let modelLoaded = false;
 
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -321,49 +448,41 @@
 
         // Cargar modelo IA
         async function loadModel() {
-            if (segmenter) return segmenter;
-            if (modelLoading) {
-                // Esperar a que termine de cargar
-                while (modelLoading) {
-                    await new Promise(r => setTimeout(r, 500));
-                }
-                return segmenter;
-            }
+            if (modelLoaded) return;
             
-            modelLoading = true;
             aiModal.classList.add('active');
             aiTitle.textContent = '🤖 Cargando IA...';
-            aiMessage.textContent = 'Descargando modelo (solo la primera vez)';
-            progressFill.style.width = '0%';
-            progressText.textContent = '0%';
+            aiMessage.textContent = 'Descargando modelo (solo la 1ra vez)';
+            progressFill.style.width = '10%';
+            progressText.textContent = '10%';
 
             try {
-                segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4', {
-                    progress_callback: (data) => {
-                        if (data.status === 'progress') {
-                            const percent = Math.round((data.progress || 0) * 100);
+                // Precargar el modelo
+                await removeBackground(new Image(), {
+                    progress: (key, current, total) => {
+                        if (total > 0) {
+                            const percent = Math.round((current / total) * 90) + 10;
                             progressFill.style.width = percent + '%';
                             progressText.textContent = percent + '%';
-                            aiMessage.textContent = `Descargando modelo: ${percent}%`;
-                        } else if (data.status === 'ready') {
-                            progressFill.style.width = '100%';
-                            progressText.textContent = '100%';
-                            aiMessage.textContent = 'Modelo listo';
+                            aiMessage.textContent = `Descargando: ${percent}%`;
                         }
                     }
-                });
+                }).catch(() => {}); // Ignorar error de imagen vacía
                 
-                modelLoading = false;
-                return segmenter;
+                modelLoaded = true;
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+                aiMessage.textContent = 'Modelo listo';
+                
+                setTimeout(() => aiModal.classList.remove('active'), 500);
             } catch (err) {
-                modelLoading = false;
-                throw err;
+                console.error('Error cargando modelo:', err);
             }
         }
 
         async function startCamera() {
             try {
-                if (stream) stream.getTracks().forEach(track => track.stop());
+                if (stream) stream.getTracks().forEach(t => t.stop());
                 
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: { 
@@ -383,8 +502,12 @@
                 captureBtn.disabled = false;
                 stopBtn.disabled = false;
                 placeholderText.style.display = 'none';
+                floatMoveBtn.classList.add('active');
+                
+                // Cargar modelo en background
+                loadModel();
             } catch (err) {
-                alert('Error al acceder a la cámara: ' + err.message);
+                alert('Error cámara: ' + err.message);
             }
         }
 
@@ -398,7 +521,7 @@
         stopBtn.addEventListener('click', () => {
             isCameraActive = false;
             if (stream) {
-                stream.getTracks().forEach(track => track.stop());
+                stream.getTracks().forEach(t => t.stop());
                 video.srcObject = null;
                 stream = null;
             }
@@ -406,43 +529,71 @@
             switchCameraBtn.disabled = true;
             captureBtn.disabled = true;
             stopBtn.disabled = true;
+            floatMoveBtn.classList.remove('active');
             statusText.textContent = 'Detenido';
         });
 
-        function updateZoom() {
-            currentZoom = parseFloat(zoomSlider.value);
-            currentPosX = parseInt(posXSlider.value);
-            currentPosY = parseInt(posYSlider.value);
+        zoomSlider.addEventListener('input', (e) => {
+            currentZoom = parseFloat(e.target.value);
             document.getElementById('zoomValue').textContent = currentZoom.toFixed(1) + 'x';
-            document.getElementById('posXValue').textContent = currentPosX;
-            document.getElementById('posYValue').textContent = currentPosY;
             zoomIndicator.textContent = currentZoom.toFixed(1) + 'x';
+            video.style.transform = `scale(${currentZoom})`;
+        });
 
-            const translateX = currentPosX * 0.5;
-            const translateY = currentPosY * 0.5;
-            video.style.transform = `scale(${currentZoom}) translate(${translateX}%, ${translateY}%)`;
+        // DRAG para mover la cámara
+        let isDragging = false;
+        let startX = 0, startY = 0;
+        let currentTranslateX = 0, currentTranslateY = 0;
+
+        function handleDragStart(e) {
+            if (!isCameraActive) return;
+            isDragging = true;
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX - currentTranslateX;
+            startY = touch.clientY - currentTranslateY;
+            cameraWrapper.classList.add('dragging');
+            e.preventDefault();
         }
 
-        zoomSlider.addEventListener('input', updateZoom);
-        posXSlider.addEventListener('input', updateZoom);
-        posYSlider.addEventListener('input', updateZoom);
+        function handleDragMove(e) {
+            if (!isDragging) return;
+            const touch = e.touches ? e.touches[0] : e;
+            currentTranslateX = touch.clientX - startX;
+            currentTranslateY = touch.clientY - startY;
+            video.style.transform = `scale(${currentZoom}) translate(${currentTranslateX}px, ${currentTranslateY}px)`;
+            e.preventDefault();
+        }
 
-        // Capturar y procesar con IA
+        function handleDragEnd() {
+            isDragging = false;
+            cameraWrapper.classList.remove('dragging');
+        }
+
+        cameraWrapper.addEventListener('mousedown', handleDragStart);
+        cameraWrapper.addEventListener('touchstart', handleDragStart, { passive: false });
+        window.addEventListener('mousemove', handleDragMove);
+        window.addEventListener('touchmove', handleDragMove, { passive: false });
+        window.addEventListener('mouseup', handleDragEnd);
+        window.addEventListener('touchend', handleDragEnd);
+
+        floatMoveBtn.addEventListener('click', () => {
+            cameraWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            alert('✋ Ahora arrastra la cámara con tu dedo para reposicionarla');
+        });
+
+        // CAPTURAR CON IA
         captureBtn.addEventListener('click', async () => {
             if (!isCameraActive) return;
-            
             captureBtn.disabled = true;
-            
-            try {
-                // 1. Cargar modelo IA
-                const model = await loadModel();
-                
-                aiTitle.textContent = ' Capturando...';
-                aiMessage.textContent = 'Tomando foto con zoom aplicado';
-                progressFill.style.width = '10%';
-                progressText.textContent = '10%';
 
-                // 2. Capturar frame del video con zoom
+            try {
+                aiModal.classList.add('active');
+                aiTitle.textContent = '📸 Capturando...';
+                aiMessage.textContent = 'Tomando foto con zoom';
+                progressFill.style.width = '20%';
+                progressText.textContent = '20%';
+
+                // Capturar frame con zoom y posición
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
                 const vw = video.videoWidth;
@@ -451,134 +602,82 @@
                 tempCanvas.width = vw;
                 tempCanvas.height = vh;
                 
-                const centerX = vw / 2;
-                const centerY = vh / 2;
-                const panX = (currentPosX / 100) * (vw / 2);
-                const panY = (currentPosY / 100) * (vh / 2);
-                
-                tempCtx.translate(centerX + panX, centerY + panY);
+                tempCtx.translate(vw/2 + currentTranslateX, vh/2 + currentTranslateY);
                 tempCtx.scale(currentZoom, currentZoom);
-                tempCtx.translate(-centerX, -centerY);
+                tempCtx.translate(-vw/2, -vh/2);
                 tempCtx.drawImage(video, 0, 0, vw, vh);
-                
-                progressFill.style.width = '20%';
-                progressText.textContent = '20%';
-                aiTitle.textContent = '🤖 IA Analizando...';
-                aiMessage.textContent = 'Detectando el objeto y eliminando el fondo';
 
-                // 3. Procesar con IA
-                const result = await model(tempCanvas, {
-                    threshold: 0.5,
-                    mask_threshold: 0.5
+                progressFill.style.width = '30%';
+                aiTitle.textContent = '🤖 IA Procesando...';
+                aiMessage.textContent = 'Eliminando fondo del objeto';
+
+                // Procesar con IA
+                const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
+                const resultBlob = await removeBackground(blob, {
+                    progress: (key, current, total) => {
+                        if (total > 0) {
+                            const percent = 30 + Math.round((current / total) * 50);
+                            progressFill.style.width = percent + '%';
+                            progressText.textContent = percent + '%';
+                        }
+                    }
                 });
 
-                progressFill.style.width = '70%';
-                progressText.textContent = '70%';
-                aiTitle.textContent = '✨ Aplicando fondo elegante...';
-                aiMessage.textContent = 'Creando tu imagen profesional';
+                progressFill.style.width = '85%';
+                aiTitle.textContent = '✨ Creando imagen...';
+                aiMessage.textContent = 'Aplicando fondo elegante';
 
-                // 4. Procesar resultado
-                const mask = result.mask;
-                const maskData = mask.data;
-                const maskWidth = mask.width;
-                const maskHeight = mask.height;
+                // Cargar resultado
+                const img = new Image();
+                img.onload = () => {
+                    const outSize = parseInt(qualitySelect.value);
+                    const outHeight = Math.round(outSize * 0.75);
+                    resultCanvas.width = outSize;
+                    resultCanvas.height = outHeight;
 
-                // Crear canvas con máscara aplicada
-                const processedCanvas = document.createElement('canvas');
-                processedCanvas.width = vw;
-                processedCanvas.height = vh;
-                const pCtx = processedCanvas.getContext('2d');
-                
-                // Dibujar imagen original
-                pCtx.drawImage(tempCanvas, 0, 0);
-                
-                // Aplicar máscara
-                const imageData = pCtx.getImageData(0, 0, vw, vh);
-                const pixels = imageData.data;
-                
-                // Escalar máscara al tamaño de la imagen
-                const maskCanvas = document.createElement('canvas');
-                maskCanvas.width = vw;
-                maskCanvas.height = vh;
-                const mCtx = maskCanvas.getContext('2d');
-                
-                // Dibujar máscara escalada
-                const maskImageData = mCtx.createImageData(vw, vh);
-                for (let y = 0; y < vh; y++) {
-                    for (let x = 0; x < vw; x++) {
-                        const mx = Math.floor((x / vw) * maskWidth);
-                        const my = Math.floor((y / vh) * maskHeight);
-                        const maskIdx = my * maskWidth + mx;
-                        const maskVal = maskData[maskIdx] || 0;
-                        const outIdx = (y * vw + x) * 4;
-                        maskImageData.data[outIdx] = 255;
-                        maskImageData.data[outIdx + 1] = 255;
-                        maskImageData.data[outIdx + 2] = 255;
-                        maskImageData.data[outIdx + 3] = maskVal;
-                    }
-                }
-                mCtx.putImageData(maskImageData, 0, 0);
-                
-                // Usar la máscara para recortar
-                pCtx.globalCompositeOperation = 'destination-in';
-                pCtx.drawImage(maskCanvas, 0, 0);
-                pCtx.globalCompositeOperation = 'source-over';
+                    // Fondo
+                    resultCtx.fillStyle = bgColor.value;
+                    resultCtx.fillRect(0, 0, outSize, outHeight);
 
-                // 5. Crear imagen final con fondo
-                const outSize = parseInt(qualitySelect.value);
-                const outHeight = Math.round(outSize * 0.75);
-                resultCanvas.width = outSize;
-                resultCanvas.height = outHeight;
+                    // Dibujar objeto
+                    const scale = Math.min(outSize / img.width, outHeight / img.height) * 0.92;
+                    const drawW = img.width * scale;
+                    const drawH = img.height * scale;
+                    const x = (outSize - drawW) / 2;
+                    const y = (outHeight - drawH) / 2;
 
-                // Fondo de color
-                resultCtx.fillStyle = bgColor.value;
-                resultCtx.fillRect(0, 0, outSize, outHeight);
+                    resultCtx.shadowColor = 'rgba(0,0,0,0.2)';
+                    resultCtx.shadowBlur = 25;
+                    resultCtx.shadowOffsetY = 12;
+                    resultCtx.drawImage(img, x, y, drawW, drawH);
+                    resultCtx.shadowColor = 'transparent';
 
-                // Dibujar objeto centrado
-                const scale = Math.min(outSize / vw, outHeight / vh) * 0.9;
-                const drawW = vw * scale;
-                const drawH = vh * scale;
-                const x = (outSize - drawW) / 2;
-                const y = (outHeight - drawH) / 2;
+                    progressFill.style.width = '100%';
+                    progressText.textContent = '100%';
+                    aiTitle.textContent = '✅ ¡Listo!';
+                    aiMessage.textContent = 'Foto profesional creada';
 
-                // Sombra elegante
-                resultCtx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-                resultCtx.shadowBlur = 30;
-                resultCtx.shadowOffsetX = 0;
-                resultCtx.shadowOffsetY = 15;
-                resultCtx.drawImage(processedCanvas, x, y, drawW, drawH);
-                resultCtx.shadowColor = 'transparent';
+                    setTimeout(() => {
+                        aiModal.classList.remove('active');
+                        resultCanvas.style.display = 'block';
+                        placeholderText.style.display = 'none';
+                        
+                        if (isIOS()) saveHint.style.display = 'block';
 
-                // Marco sutil
-                resultCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                resultCtx.lineWidth = 3;
-                resultCtx.strokeRect(15, 15, outSize - 30, outHeight - 30);
-
-                progressFill.style.width = '100%';
-                progressText.textContent = '100%';
-                aiTitle.textContent = '✅ ¡Listo!';
-                aiMessage.textContent = 'Tu foto profesional está lista';
-
-                setTimeout(() => {
-                    aiModal.classList.remove('active');
-                    resultCanvas.style.display = 'block';
-                    placeholderText.style.display = 'none';
-                    
-                    if (isIOS()) saveHint.style.display = 'block';
-
-                    // Descarga automática
-                    const link = document.createElement('a');
-                    link.download = 'object_studio_' + Date.now() + '.png';
-                    link.href = resultCanvas.toDataURL('image/png');
-                    link.click();
-                    
-                    captureBtn.disabled = false;
-                }, 800);
+                        const link = document.createElement('a');
+                        link.download = 'ai_object_' + Date.now() + '.png';
+                        link.href = resultCanvas.toDataURL('image/png');
+                        link.click();
+                        
+                        captureBtn.disabled = false;
+                    }, 600);
+                };
+                img.src = URL.createObjectURL(resultBlob);
 
             } catch (err) {
                 aiModal.classList.remove('active');
                 captureBtn.disabled = false;
-                alert('Error al procesar con IA: ' + err.message);
+                alert('Error IA: ' + err.message);
                 console.error(err);
             }
         });
